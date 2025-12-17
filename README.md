@@ -4,7 +4,9 @@ A containerized, interactive data dashboard built with Python Shiny and deployed
 
 - **[Live Application](https://cacaiodocker-407940146224.us-central1.run.app/)**
 - **[Source Code](https://github.com/CaioMussatto/Cacaio-docker.git)**
-- **[Docker Image](https://hub.docker.com/repository/docker/caiomussatto/cacaio-docker)**
+- **[Docker Image](https://hub.docker.com/repository/docker/caiomussatto/cacaiodocker)**
+
+**Application Performance Note**: This application is deployed on Google Cloud Run, a serverless platform. If the service has not received recent traffic, it may experience a **cold start** of approximately 1-2 minutes as the container instance initializes. Subsequent requests will be significantly faster while the instance remains active.
 
 ## Table of Contents
 - [Cacaio Shiny App - Interactive Data Dashboard](#cacaio-shiny-app---interactive-data-dashboard)
@@ -12,11 +14,8 @@ A containerized, interactive data dashboard built with Python Shiny and deployed
   - [Project Overview](#project-overview)
   - [Key Features \& Technology Stack](#key-features--technology-stack)
   - [Deployment Journey \& Architecture](#deployment-journey--architecture)
-  - [Local Setup \& Development](#local-setup--development)
-  - [Data Download Instructions](#data-download-instructions)
-    - [For Git Users (Local Development)](#for-git-users-local-development)
-    - [For Docker Users](#for-docker-users)
-    - [Dataset Information](#dataset-information)
+  - [Quick Start (Using Docker)](#quick-start-using-docker)
+  - [Development Setup (From Source)](#development-setup-from-source)
   - [Project Structure](#project-structure)
   - [Contributing](#contributing)
   - [License](#license)
@@ -62,16 +61,30 @@ Deploying this application involved several key steps that demonstrate important
    - The image was deployed to **Google Cloud Run** as a serverless service.
    - Configuration included setting memory limits (`1Gi`), CPU allocation, and a generous timeout to accommodate the app's intensive startup process.
 
----
-
 **Architectural Flow:**
 ```
 Local Code → Docker Build → Image in GCR → Cloud Run Service → Public HTTPS URL
 ```
 
-## Local Setup & Development
+## Quick Start (Using Docker)
 
-Follow these steps to run a copy of this project on your local machine.
+For the fastest way to run the application locally, use the pre-built Docker image:
+
+```bash
+# Pull the image from Docker Hub
+docker pull caiomussatto/cacaiodocker:latest
+
+# Run the container (all data included)
+docker run -p 8000:8000 caiomussatto/cacaiodocker:latest
+
+# Access the application at http://localhost:8000
+```
+
+**Note**: The Docker image contains all necessary datasets and dependencies. No additional downloads are required.
+
+## Development Setup (From Source)
+
+If you want to work with the source code or contribute to the project:
 
 **Prerequisites:**
 - [Docker](https://www.docker.com/get-started) installed and running.
@@ -85,7 +98,7 @@ Follow these steps to run a copy of this project on your local machine.
    cd CacaioDocker
    ```
 
-2. **Download and extract the full datasets** (required for local execution):
+2. **Download and extract the datasets** (required when building from source):
    ```bash
    # Download the compressed data archive
    wget https://storage.googleapis.com/dados_cacaio/cacaio_data.tar.gz
@@ -104,12 +117,6 @@ Follow these steps to run a copy of this project on your local machine.
    ```bash
    docker build -t cacaioshiny-local .
    ```
-   
-   **Alternative: Pull from Docker Hub**
-   ```bash
-   docker pull caiomussatto/cacaio-docker:latest
-   docker tag caiomussatto/cacaio-docker:latest cacaioshiny-local
-   ```
 
 4. **Run the container**:
    ```bash
@@ -117,30 +124,6 @@ Follow these steps to run a copy of this project on your local machine.
    ```
 
 5. **Access the application**: Open your browser and navigate to `http://localhost:8000`.
-
-## Data Download Instructions
-
-### For Git Users (Local Development)
-When cloning this repository, you need to download the complete datasets separately as they are not included in the Git repository due to size constraints:
-
-```bash
-# From within the project directory
-wget https://storage.googleapis.com/dados_cacaio/cacaio_data.tar.gz
-tar -xzf cacaio_data.tar.gz -C data/
-rm cacaio_data.tar.gz
-```
-
-**Note**: The application requires these data files to function correctly. Ensure they are placed in the `data/` directory before running.
-
-### For Docker Users
-The Docker image available on Docker Hub already includes the complete datasets, so no additional download is required when using the pre-built image.
-
-### Dataset Information
-- **Complete Dataset Archive**: [cacaio_data.tar.gz](https://storage.googleapis.com/dados_cacaio/cacaio_data.tar.gz)
-- **Contents**: 
-  - `sc_samples.pkl` (116MB): Single-cell RNA sequencing sample data
-  - `degs.pkl` (73MB): Differential gene expression analysis results
-- **Total Size**: ~189MB (compressed to ~160MB in tar.gz format)
 
 ## Project Structure
 
@@ -156,11 +139,13 @@ CacaioDocker/
 ├── Dockerfile          # Multi-stage Docker build instructions
 ├── .dockerignore       # Files to exclude from Docker build context
 ├── .gitignore          # Files to exclude from version control
-├── data/               # Application datasets (to be downloaded)
-│   ├── degs.pkl        # Downloaded from external storage
-│   └── sc_samples.pkl  # Downloaded from external storage
+├── data/               # Application datasets (to be downloaded when building from source)
+│   ├── degs.pkl        # Differential gene expression analysis results
+│   └── sc_samples.pkl  # Single-cell RNA sequencing sample data
 └── README.md           # This documentation file
 ```
+
+**Important**: The `data/` directory is empty in the GitHub repository. When building from source, you must download the datasets as described in the Development Setup section. The Docker image on Docker Hub contains all necessary data.
 
 ## Contributing
 
@@ -175,3 +160,4 @@ Contributions, issues, and feature requests are welcome.
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
+
